@@ -1,5 +1,6 @@
 import cv2
 import time
+import pickle
 
 from cvzone.HandTrackingModule import HandDetector
 
@@ -33,8 +34,8 @@ while True:
         
         if cont_frame >= qnt_frame:
             gravando = False
-            arquivo = open(f'letras/C/{time.time()}.txt', 'a')
-            arquivo.write(str(pontos_mao))
+            with open(f'letras/C/{time.time()}.pickle', 'wb') as arquivo:
+                pickle.dump(pontos_mao, arquivo)
             arquivo.close()
             
             qnt_salvos += 1
