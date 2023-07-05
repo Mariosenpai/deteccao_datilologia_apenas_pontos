@@ -1,6 +1,7 @@
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.keras.callbacks import TensorBoard
+from scipy.stats import zscore
 import cv2
 import os
 import numpy as np
@@ -19,7 +20,7 @@ def enquadra_mao(hands, img):
 
             imgBranca = np.ones((tam_img, tam_img, 3), np.uint8) * 255
             imgBox = img[y - add_espaco: y + h + add_espaco, x - add_espaco: x + w + add_espaco]
-            #cv2.imshow("imageMao", imgBox)
+            # cv2.imshow("imageMao", imgBox)
 
             imgBoxShape = imgBox.shape
 
@@ -46,35 +47,51 @@ def enquadra_mao(hands, img):
         except:
             pass
 
+
+def redimenciona_pontos(pontos_frame, x, y):
+    for ponto in pontos_frame:
+        p_x = ponto[0]
+        p_y = ponto[1]
+
+        p_x = p_x - x
+        p_y = p_y - y
+
+        ponto[0] = p_x
+        ponto[1] = p_y
+    return pontos_frame
+
+
 def normalizar_pontos(pontos_frame):
 
-    maior_x = 0
-    maior_y = 0
-    maior_z = 0
-    for ponto in pontos_frame:
-        if maior_x > ponto[0]:
-            maior_x = ponto[0]
-        if maior_y > ponto[1]:
-            maior_y = ponto[1]
-        if maior_z > ponto[2]:
-            maior_z = ponto[2]
+    pontos_x = []
+    pontos_y = []
+    pontos_z = []
+    for pontos in pontos_frame:
+        pontos_x.append(pontos[0])
+        pontos_y.append(pontos[1])
+        pontos_z.append(pontos[2])
 
-    for ponto in pontos_frame:
-        ponto[0] = ponto[0] / maior_x
-        ponto[1] = ponto[1] / maior_y
-        ponto[2] = ponto[2] / maior_z
+    # normalizer vetores
+    x_normalizado = ((pontos_x - np.min(pontos_x)) / (np.max(pontos_x) - np.min(pontos_x)) * 2) - 1
+    y_normalizado = ((pontos_y - np.min(pontos_y)) / (np.max(pontos_y) - np.min(pontos_y)) * 2) - 1
+    z_normalizado = ((pontos_z - np.min(pontos_z)) / (np.max(pontos_z) - np.min(pontos_z)) * 2) - 1
+
+    for i, pontos in enumerate(pontos_frame):
+        pontos[0] = x_normalizado[i]
+        pontos[1] = y_normalizado[i]
+        pontos[2] = z_normalizado[i]
 
     return pontos_frame
 
 
-def model(shape):
+def model(shape, acoes):
     model = Sequential()
-    model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=shape))
+    model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=shape[1:]))
     model.add(LSTM(128, return_sequences=True, activation='relu'))
     model.add(LSTM(64, return_sequences=False, activation='relu'))
     model.add(Dense(64, activation='relu'))
     model.add(Dense(32, activation='relu'))
-    model.add(Dense(3, activation='softmax'))
+    model.add(Dense(acoes, activation='softmax'))
 
     model.summary()
 

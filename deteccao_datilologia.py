@@ -1,7 +1,7 @@
 import cv2
 import time
 import pickle
-from funcoes import enquadra_mao, normalizar_pontos
+from funcoes import enquadra_mao, normalizar_pontos, redimenciona_pontos
 
 from cvzone.HandTrackingModule import HandDetector
 
@@ -35,10 +35,16 @@ while True:
     if gravando:
 
         if cont_frame >= qnt_frame:
+
+            pontos_mao_normalizados = []
+            for pontos in pontos_mao:
+                pontos_frame_normalizado = normalizar_pontos(pontos_frame)
+                pontos_mao_normalizados.append(pontos_frame_normalizado)
+
             gravando = False
-            with open(f'letras/A/{time.time()}.pickle', 'wb') as arquivo:
-                pickle.dump(pontos_mao, arquivo)
-                print(pontos_mao)
+            with open(f'letras/C/{time.time()}.pickle', 'wb') as arquivo:
+                pickle.dump(pontos_mao_normalizados, arquivo)
+                print(pontos_mao_normalizados)
             arquivo.close()
 
             qnt_salvos += 1
@@ -53,18 +59,5 @@ while True:
             hand = hands[0]
             pontos_frame = hand['lmList']
 
-            for ponto in pontos_frame:
-
-                p_x = ponto[0]
-                p_y = ponto[1]
-
-                p_x = p_x - x
-                p_y = p_y - y
-
-                ponto[0] = p_x
-                ponto[1] = p_y
-
-            pontos_frame = normalizar_pontos(pontos_frame)
-
-            pontos_mao.append(pontos_frame)
+            pontos_mao.append(redimenciona_pontos(pontos_frame, x, y))
             cont_frame += 1
