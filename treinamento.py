@@ -1,14 +1,11 @@
 import numpy as np
 
 from funcoes import pegaCaminhoArquivos, model
+from tensorflow.keras.utils import to_categorical
+from sklearn.ensemble import RandomForestClassifier
 import pickle
 
 acoes = ['A', 'B', 'C']
-
-acoes_dic = {}
-
-for i, acao in enumerate(acoes):
-    acoes_dic.update({acao:i})
 
 pasta_principal = 'letras'
 
@@ -18,6 +15,8 @@ data_pontos = []
 data_treino = []
 labels_treino = []
 
+label_map = {label:num for num, label in enumerate(acoes)}
+
 for acao in acoes:
     a = caminho_dic[acao]
     for arquivo in a:
@@ -25,7 +24,7 @@ for acao in acoes:
             conteudo = pickle.load(arquivo_aberto)
             data_treino.append(conteudo)
             #data_pontos += data_treino
-            labels_treino.append(acoes_dic[acao])
+            labels_treino.append(label_map[acao])
 
 
 x_np = np.array(data_treino)
@@ -39,7 +38,7 @@ for i, video in enumerate(x_np):
     x.append(video)
 
 x = np.array(x)
-y = np.array(labels_treino)
+y = to_categorical(labels_treino).astype(int)
 
 x_shape = x.shape
 
@@ -48,9 +47,16 @@ qnt_frame = len(data_treino[0])
 pontos_por_frames = len(data_treino[0][0])
 
 print(f"reshape = {x_shape}")
+print(f"Shape label = {y.shape}")
 print(f"Quantidade de videos = {qnt_video}")
 print(f"Quantidade de frames por video = {qnt_frame}")
 print(f"Quantidade de pontos por frame = {pontos_por_frames}")
 
-model = model(x_shape, len(acoes))
+print("------------------------------------------------------")
+print(y)
+print(x[0])
+
+model = model(x_shape[1:], acoes)
+#1800
+model.fit(x, y, epochs=2000, batch_size=10)
 

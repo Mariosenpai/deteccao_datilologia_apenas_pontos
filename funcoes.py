@@ -1,5 +1,6 @@
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
+import keras
 from tensorflow.keras.callbacks import TensorBoard
 from scipy.stats import zscore
 import cv2
@@ -86,19 +87,18 @@ def normalizar_pontos(pontos_frame):
 
 def model(shape, acoes):
     model = Sequential()
-    model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=shape[1:]))
-    model.add(LSTM(128, return_sequences=True, activation='relu'))
-    model.add(LSTM(64, return_sequences=False, activation='relu'))
-    model.add(Dense(64, activation='relu'))
+    model.add(LSTM(32, return_sequences=True, activation='relu', input_shape=shape))
+    model.add(LSTM(64, return_sequences=True, activation='relu'))
+    model.add(LSTM(32, return_sequences=False, activation='relu'))
     model.add(Dense(32, activation='relu'))
-    model.add(Dense(acoes, activation='softmax'))
+    model.add(Dense(len(acoes), activation='softmax'))
 
     model.summary()
-
-    model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
+    # momentum=0.9
+    optmizer = keras.optimizers.SGD(learning_rate=0.001)
+    model.compile(optimizer=optmizer, loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 
     return model
-
 
 def pegaCaminhoArquivos(pasta_principal):
     caminho_dic = {}
