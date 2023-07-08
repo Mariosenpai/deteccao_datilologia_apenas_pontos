@@ -63,7 +63,6 @@ def redimenciona_pontos(pontos_frame, x, y):
 
 
 def normalizar_pontos(pontos_frame):
-
     pontos_x = []
     pontos_y = []
     pontos_z = []
@@ -85,12 +84,22 @@ def normalizar_pontos(pontos_frame):
     return pontos_frame
 
 
+def reshape(data):
+    x = []
+    x_np = np.array(data)
+    x_np_shape = x_np[0].shape
+    for i, video in enumerate(x_np):
+        video = video.reshape(x_np_shape[0] * x_np_shape[1], x_np_shape[2])
+        x.append(video)
+    return np.array(x)
+
+
 def model(shape, acoes):
     model = Sequential()
     model.add(LSTM(32, return_sequences=True, activation='relu', input_shape=shape))
     model.add(LSTM(64, return_sequences=True, activation='relu'))
     model.add(LSTM(32, return_sequences=False, activation='relu'))
-    model.add(Dense(32, activation='relu'))
+    model.add(Dense(16, activation='relu'))
     model.add(Dense(len(acoes), activation='softmax'))
 
     model.summary()
@@ -99,6 +108,7 @@ def model(shape, acoes):
     model.compile(optimizer=optmizer, loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 
     return model
+
 
 def pegaCaminhoArquivos(pasta_principal):
     caminho_dic = {}

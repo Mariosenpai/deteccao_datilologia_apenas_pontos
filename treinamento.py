@@ -1,6 +1,6 @@
 import numpy as np
 
-from funcoes import pegaCaminhoArquivos, model
+from funcoes import pegaCaminhoArquivos, model, reshape
 from tensorflow.keras.utils import to_categorical
 from sklearn.ensemble import RandomForestClassifier
 import pickle
@@ -27,17 +27,9 @@ for acao in acoes:
             labels_treino.append(label_map[acao])
 
 
-x_np = np.array(data_treino)
-x = []
+print(f"shape original = {np.array(data_pontos).shape}")
 
-print(f"shape original = {x_np.shape}")
-
-x_np_shape = x_np[0].shape
-for i, video in enumerate(x_np):
-    video = video.reshape(x_np_shape[0]*x_np_shape[1], x_np_shape[2])
-    x.append(video)
-
-x = np.array(x)
+x = reshape(data_treino)
 y = to_categorical(labels_treino).astype(int)
 
 x_shape = x.shape
@@ -52,11 +44,10 @@ print(f"Quantidade de videos = {qnt_video}")
 print(f"Quantidade de frames por video = {qnt_frame}")
 print(f"Quantidade de pontos por frame = {pontos_por_frames}")
 
-print("------------------------------------------------------")
-print(y)
-print(x[0])
 
 model = model(x_shape[1:], acoes)
-#1800
-model.fit(x, y, epochs=2000, batch_size=10)
+#300
+h = model.fit(x, y, epochs=500, batch_size=10)
 
+model.save("model/dd.h5")
+print("Modelo salvo!!")
