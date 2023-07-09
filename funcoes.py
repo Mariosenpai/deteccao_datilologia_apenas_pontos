@@ -85,14 +85,14 @@ def normalizar_pontos(pontos_frame):
 
 
 def reshape(data):
-    print(f"Shape original {np.array(data).shape}")
+    #print(f"Shape original {np.array(data).shape}")
     x = []
     x_np = np.array(data)
     x_np_shape = x_np[0].shape
     for i, video in enumerate(x_np):
         video = video.reshape(x_np_shape[0] * x_np_shape[1], x_np_shape[2])
         x.append(video)
-    print(f"Reshape {np.array(x).shape}")
+    #print(f"Reshape {np.array(x).shape}")
     return np.asarray(x)
 
 

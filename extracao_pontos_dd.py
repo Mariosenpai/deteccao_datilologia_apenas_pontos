@@ -42,7 +42,7 @@ while True:
                 pontos_mao_normalizados.append(pontos_frame_normalizado)
 
             gravando = False
-            with open(f'letras/C/{time.time()}.pickle', 'wb') as arquivo:
+            with open(f'letras/H/{time.time()}.pickle', 'wb') as arquivo:
                 pickle.dump(pontos_mao_normalizados, arquivo)
                 print(pontos_mao_normalizados)
             arquivo.close()

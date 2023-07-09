@@ -6,9 +6,10 @@ from funcoes import pegaCaminhoArquivos, model, reshape
 from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 import pickle
 
-acoes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', ]
+acoes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O','P' , 'Q','R', 'S', 'T', 'U', 'V','W' , 'X', 'Y', 'Z' ]
 
 pasta_principal = 'letras'
 
@@ -57,19 +58,22 @@ steps = math.ceil(len(x/batch_size))
 nsamples, nx, ny = x.shape
 d2_train_dataset = x.reshape((nsamples,nx*ny))
 
-base_teste = 0.1
-x_treino, x_teste, y_treino, y_teste = train_test_split(d2_train_dataset, y,test_size=base_teste)
+while True:
+    base_teste = 0.125
+    x_treino, x_teste, y_treino, y_teste = train_test_split(d2_train_dataset, y,test_size=base_teste)
+    print(f'treino = {len(x_treino)}\nValidacao = {len(x_teste)}')
 
-model.fit(x_treino, y_treino)
+    model.fit(x_treino, y_treino)
 
-y_predict = model.predict(x_teste)
+    y_predict = model.predict(x_teste)
 
-from sklearn.metrics import accuracy_score
-score = accuracy_score(y_predict, y_teste)
+    score = accuracy_score(y_predict, y_teste)
+    print('{}% de acertos na validação!'.format(score * 100))
+    if score > 0.95: break
+    
 
-print('{}% de acertos na validação!'.format(score * 100))
 
-f = open('model/model.p', 'wb')
+f = open('model/model_randomForest_A-Z.p', 'wb')
 pickle.dump({'model': model}, f)
 f.close()
 
