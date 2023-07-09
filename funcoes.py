@@ -98,10 +98,10 @@ def reshape(data):
 
 def model(shape, acoes):
     model = Sequential()
-    model.add(LSTM(32, return_sequences=True, activation='relu', input_shape=shape))
-    model.add(LSTM(64, return_sequences=True, activation='relu'))
-    model.add(LSTM(32, return_sequences=False, activation='relu'))
-    model.add(Dense(16, activation='relu'))
+    model.add(LSTM(256, return_sequences=True, activation='relu', input_shape=shape))
+    model.add(LSTM(128, return_sequences=True, activation='relu'))
+    model.add(LSTM(64, return_sequences=False, activation='relu'))
+    model.add(Dense(64, activation='relu'))
     model.add(Dense(len(acoes), activation='softmax'))
 
     model.summary()

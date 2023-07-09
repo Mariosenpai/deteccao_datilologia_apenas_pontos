@@ -1,11 +1,14 @@
+import math
+
 import numpy as np
 
 from funcoes import pegaCaminhoArquivos, model, reshape
 from tensorflow.keras.utils import to_categorical
+from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 import pickle
 
-acoes = ['A', 'B', 'C']
+acoes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', ]
 
 pasta_principal = 'letras'
 
@@ -15,7 +18,7 @@ data_pontos = []
 data_treino = []
 labels_treino = []
 
-label_map = {label:num for num, label in enumerate(acoes)}
+label_map = {label: num for num, label in enumerate(acoes)}
 
 for acao in acoes:
     a = caminho_dic[acao]
@@ -23,9 +26,8 @@ for acao in acoes:
         with open(arquivo, 'rb') as arquivo_aberto:
             conteudo = pickle.load(arquivo_aberto)
             data_treino.append(conteudo)
-            #data_pontos += data_treino
+            # data_pontos += data_treino
             labels_treino.append(label_map[acao])
-
 
 print(f"shape original = {np.array(data_pontos).shape}")
 
@@ -45,9 +47,31 @@ print(f"Quantidade de frames por video = {qnt_frame}")
 print(f"Quantidade de pontos por frame = {pontos_por_frames}")
 
 
-model = model(x_shape[1:], acoes)
-#300
-h = model.fit(x, y, epochs=500, batch_size=10)
+#print(f'treino = {len(x_treino)}\nValidacao = {len(x_teste)}')
 
-model.save("model/dd.h5")
+model = RandomForestClassifier()
+epocas = 500
+batch_size = 10
+steps = math.ceil(len(x/batch_size))
+
+nsamples, nx, ny = x.shape
+d2_train_dataset = x.reshape((nsamples,nx*ny))
+
+base_teste = 0.1
+x_treino, x_teste, y_treino, y_teste = train_test_split(d2_train_dataset, y,test_size=base_teste)
+
+model.fit(x_treino, y_treino)
+
+y_predict = model.predict(x_teste)
+
+from sklearn.metrics import accuracy_score
+score = accuracy_score(y_predict, y_teste)
+
+print('{}% de acertos na validação!'.format(score * 100))
+
+f = open('model/model.p', 'wb')
+pickle.dump({'model': model}, f)
+f.close()
+
+#model.save("model/dd_1.h5")
 print("Modelo salvo!!")
